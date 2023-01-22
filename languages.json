@@ -1,0 +1,25 @@
+{
+    "default": "es",
+    "list": [
+        {
+            "code": "es",
+            "slug": "spanish",
+            "name": "Español"
+        },
+        {
+            "code": "en",
+            "slug": "english",
+            "name": "English"
+        },
+        {
+            "code": "fr",
+            "slug": "french",
+            "name": "Française "
+        },
+        {
+            "code": "pl",
+            "slug": "polish",
+            "name": "Polish"
+        }
+    ]
+}
