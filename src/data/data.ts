@@ -38,6 +38,13 @@ const MAX_POST_PER_CATEGORY = parseInt(import.meta.env.MAX_POST_PER_CATEGORY || 
 const disableGenEnv = import.meta.env.DISABLE_GENERATION?.trim().toLowerCase()
 const DISABLE_GENERATION = disableGenEnv === 'true' || disableGenEnv === 'yes'
 
+
+if(DISABLE_GENERATION) {
+    console.log('\x1b[36m******************************************************************************\x1b[0m')
+    console.log("GENERATION DISABLED")
+    console.log('\x1b[36m******************************************************************************\x1b[0m')
+}
+
 function docsOf<T extends DocData>(queryResult: FirebaseFirestore.QuerySnapshot<FirebaseFirestore.DocumentData>) {
     return queryResult.docs.map(doc => docOf<T>(doc)!)
 }
