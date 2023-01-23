@@ -2,24 +2,37 @@ import { openai } from "../aitools/openai";
 import type { Author, Category, Post } from "./data";
 
 async function autocomplete(prompt: string, maxTokens: number) {
-    const response = await openai.createCompletion({
-        model: "text-davinci-003",
-        prompt,
-        temperature: 0.7,
-        max_tokens: 40 * maxTokens,
-        top_p: 1,
-        frequency_penalty: 0,
-        presence_penalty: 0,
-    })
+    await delay(2000)
+    console.log("AUTOCOMPLETE REQUEST")
+    let response
+    try {
+        response = await openai.createCompletion({
+            model: "text-davinci-003",
+            prompt,
+            temperature: 0.7,
+            max_tokens: 1000,
+            top_p: 1,
+            frequency_penalty: 0,
+            presence_penalty: 0,
+        })
+    } catch (error) {
+        console.log((error as any).response.data)
+        throw new Error("Api error: " + (error as any).response.data.error.message)
+    }
 
-    return (response.data.choices[0].text || '').trim()
+
+    const result = (response.data.choices[0].text || '').trim()
+    console.log("\x1b[35m" + prompt + "\x1b[36m" + response.data.choices[0].text + "\x1b[0m")
+    console.log("AUTOCOMPLETE ENDED")
+
+    return result
 }
 
 function separateList(text: string) {
     let lines = text.split('\n')
     lines = lines.map(line => line.replace(/^(([0-9]+\. *)|([0-9]+ *\- *)|( *\- *))/gi, ''))
     lines = lines.map(line => {
-        if (/^".*"$/.test(line)) return line.substring(1, line.length - 1)
+        if (/^(".*")|('.*')$/.test(line)) return line.substring(1, line.length - 1)
         return line
     })
     return lines
@@ -36,8 +49,9 @@ export async function generateCategoriesTitles(initialCategories: Category[], ma
         prompt += '\n-' + topic
     }
 
-    prompt += `\n\nGenerate 10 blog categories based on the topics:\n`
+    prompt += `\n\nGenerate ${maxAmount} blog categories based on the topics:\n`
     for (const category of initialCategories) {
+        console.log(category)
         prompt += '\n-' + category.name
     }
 
@@ -56,7 +70,7 @@ export function generateCategoryDescription(title: string) {
 
 export function generateSlugFromTitle(title: string) {
     const prompt = "Task: create slug for this title: \n" + title
-        + '---'
+        + '\n---\n'
         + "slug:"
     return autocomplete(prompt, 100)
 }
@@ -86,7 +100,9 @@ let topics: string[] | null = null
 
 export async function generateTopics(limit: number = 30) {
     if (topics) return topics
-    return separateList(await autocomplete(`List ${limit} general topics of blogs and news:`, limit * 40))
+    const generated = separateList(await autocomplete(`List ${limit} general topics of blogs and news:`, limit * 40))
+    topics = generated
+    return topics
 }
 
 export async function matchTitleToAuthor(authors: Author[], title: string) {
@@ -97,7 +113,7 @@ export async function matchTitleToAuthor(authors: Author[], title: string) {
         prompt += `\n${i}. ${author.lang}:${author.name} - ${author.topics.join(',')}`
         i++
     }
-    prompt += '\n\nMatch one of above with this blog post title "The Evolution of Dance Through the Ages" considering the correct topic:\nNumber: '
+    prompt += `\n\nMatch one of above with this blog post title "${title}" considering the correct topic:\nNumber: `
     const result = await autocomplete(prompt, 10)
     return authors[parseInt(result) - 1]
 }
@@ -145,4 +161,8 @@ export async function generateSummary(title: string, text: string) {
 export async function generateSlug(title: string) {
     return (await autocomplete(`Title: "${title}"
 slug:`, 400)).split('\n').filter(l => l.trim() != '')[0].trim()
+}
+
+async function delay(ms: number) {
+    return new Promise((res, rej) => setTimeout(res, ms))
 }

@@ -1,10 +1,42 @@
 ---
+import { getAuthors, getCategories, getPosts } from "../../data/data";
+import { firestore } from "../../data/config";
 import Layout from "../../layouts/Layout.astro";
-import { defaultLangSingleRoutePaths } from "../../util";
+import { defaultLangSingleRoutePaths } from "../../util/util";
+import { generateTopics } from "../../data/generators";
 
-export const getStaticPaths = defaultLangSingleRoutePaths
+export const getStaticPaths = defaultLangSingleRoutePaths;
+
+// const categories = await getCategories()
+// const posts = await getPosts(categories[0].id)
+
+const authors = await getAuthors();
+const categories = await getCategories();
+
+// console.log((await firestore.collection("posts").get()).docs)
+
+// console.log(posts)
 ---
 
 <Layout title="Autogen Blog">
-    
+    <h2>Authors</h2>
+    <ul>
+        {authors.map((author) => <li>{author.name}</li>)}
+    </ul>
+    <h2>Categories</h2>
+    <ul>
+        {
+            categories.map(async (category) => {
+                const posts = await getPosts(category.id);
+                return (
+                    <li>
+                        <div>
+                            <h3>{category.name}</h3>
+                            <ol>{posts.map(post => <li>{post.title}</li>)}</ol>
+                        </div>
+                    </li>
+                );
+            })
+        }
+    </ul>
 </Layout>

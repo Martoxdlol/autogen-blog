@@ -34,8 +34,9 @@ export interface Post extends DocData {
 
 const MAX_CATEGORIES = parseInt(import.meta.env.MAX_CATEGORIES || 20)
 const MAX_AUTHORS = parseInt(import.meta.env.MAX_AUTHORS || 20)
-const MAX_POST_PER_CATEGORY = parseInt(import.meta.env.MAX_POST_PER_CATEGORY || 20)
-
+const MAX_POST_PER_CATEGORY = parseInt(import.meta.env.MAX_POST_PER_CATEGORY || 5)
+const disableGenEnv = import.meta.env.DISABLE_GENERATION?.trim().toLowerCase()
+const DISABLE_GENERATION = disableGenEnv === 'true' || disableGenEnv === 'yes'
 
 function docsOf<T extends DocData>(queryResult: FirebaseFirestore.QuerySnapshot<FirebaseFirestore.DocumentData>) {
     return queryResult.docs.map(doc => docOf<T>(doc)!)
@@ -55,12 +56,12 @@ function docOf<T extends DocData>(docResult: FirebaseFirestore.DocumentSnapshot<
 export async function getCategories(): Promise<Category[]> {
     const categories = docsOf<Category>(await firestore.collection('categories').get())
 
-    if (categories.length < MAX_CATEGORIES) {
+    if (categories.length < MAX_CATEGORIES && !DISABLE_GENERATION) {
         const newTitles = await generateCategoriesTitles(categories, MAX_CATEGORIES)
         for (const title of newTitles) {
             const description = await generateCategoryDescription(title)
             const slug = await generateSlugFromTitle(title)
-            const result = await firestore.collection("categories").add({ title, description, slug })
+            const result = await firestore.collection("categories").add({ name: title, description, slug })
             categories.push(docOf(await firestore.collection('categories').doc(result.id).get())!)
         }
     }
@@ -75,9 +76,9 @@ export async function getCategory(id: string, lang: string) {
 
 // Authors
 export async function getAuthors(): Promise<Author[]> {
-    const authors = docsOf<Author>(await firestore.collection('categories').get())
+    const authors = docsOf<Author>(await firestore.collection('authors').get())
 
-    if (authors.length < MAX_AUTHORS) {
+    if (authors.length < MAX_AUTHORS && !DISABLE_GENERATION) {
         const newAuthors = await generateAuthorsNamesAndLangs(authors, MAX_CATEGORIES)
         for (const author of newAuthors) {
             const description = await generateAuthorSelfDescription(author.name, author.lang)
@@ -102,7 +103,7 @@ export async function getPosts(category: string): Promise<Post[]> {
     if (!categoryDoc) return []
     const posts = docsOf<Post>(await firestore.collection('posts').where('category', '==', category).get())
 
-    if (posts.length < MAX_POST_PER_CATEGORY) {
+    if (posts.length < MAX_POST_PER_CATEGORY && !DISABLE_GENERATION) {
         const newPostsTitles = await generatePostsTitlesFromCategory(posts, categoryDoc.name, MAX_POST_PER_CATEGORY)
         for (const title of newPostsTitles) {
             const author = await matchTitleToAuthor(await getAuthors(), title)
@@ -110,11 +111,11 @@ export async function getPosts(category: string): Promise<Post[]> {
             const summary = await generateSummary(title, content)
             const lang = author.lang
             const slug = await generateSlug(title)
-            const result = await firestore.collection("posts").add({ title, author, lang, summary, content, slug })
+            const result = await firestore.collection("posts").add({ title, author: author.id, lang, summary, content, slug, category: categoryDoc.id })
             posts.push(docOf<Post>(await firestore.collection('posts').doc(result.id).get())!)
         }
     }
-    
+
     return posts
 }
 
@@ -128,15 +129,17 @@ function random(mn: number, mx: number) {
     return Math.random() * (mx - mn) + mn;
 }
 
-function chooseRandoms(list: string[], amount: number) {
-    let l = [...list]
-    const r = []
-    for (let i = 0; i < amount; i++) {
-        let ran = random(0, l.length)
-        r.push(l[ran])
-        l = l.filter((_, i) => {
-            i != ran
-        })
+function chooseRandoms(list: string[], numOfElements: number) {
+    let randomIndexes: number[] = []
+    let result = [];
+    let max = list.length;
+    for (var i = 0; i < numOfElements; i++) {
+        var randomIndex = Math.floor(Math.random() * max);
+        while (randomIndexes.includes(randomIndex)) {
+            randomIndex = Math.floor(Math.random() * max);
+        }
+        randomIndexes.push(randomIndex);
+        result.push(list[randomIndex]);
     }
-    return r
+    return result;
 }

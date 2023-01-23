@@ -2,11 +2,11 @@
 import type { MarkdownInstance } from "astro";
 import { Markdown } from "@astropub/md";
 import { translate } from "../../../aitools/translate";
-import { getCurrentLang, languages } from "../../../internationalization";
-import { getSlug } from "../../../util";
 import Layout from "../../../layouts/Layout.astro";
 import { generateTitle } from "../../../aitools/title";
 import { description } from "../../../aitools/description";
+import { getCurrentLang, languages } from "../../../util/internationalization";
+import { getSlug } from "../../../util/util";
 
 // For the future, if I enable SSR
 export const prerender = true;
