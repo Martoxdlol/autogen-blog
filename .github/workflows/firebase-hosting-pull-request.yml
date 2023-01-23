@@ -10,6 +10,7 @@ jobs:
     env:
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+      DISABLE_GENERATION: true
     steps:
       - uses: actions/checkout@v2
       - run: npm ci && npm run build
