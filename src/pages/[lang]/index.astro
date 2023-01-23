@@ -32,7 +32,22 @@ const categories = await getCategories();
                     <li>
                         <div>
                             <h3>{category.name}</h3>
-                            <ol>{posts.map(post => <li>{post.title}</li>)}</ol>
+                            <ol>
+                                {posts.map((post) => (
+                                    <li>
+                                        <a
+                                            href={
+                                                "/en/" +
+                                                category.slug +
+                                                "/" +
+                                                post.slug
+                                            }
+                                        >
+                                            {post.title}
+                                        </a>
+                                    </li>
+                                ))}
+                            </ol>
                         </div>
                     </li>
                 );

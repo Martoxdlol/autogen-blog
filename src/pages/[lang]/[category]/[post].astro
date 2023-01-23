@@ -1,0 +1,61 @@
+---
+import { firestore } from "../../../data/config";
+import {
+  Category,
+  docOf,
+  docsOf,
+  getCategories,
+  getCategory,
+  getPosts,
+  Post,
+} from "../../../data/data";
+import Layout from "../../../layouts/Layout.astro";
+import { Markdown } from "@astropub/md";
+import { sanitizeSlug } from "../../../util/util";
+
+export async function getStaticPaths() {
+  const categories = await getCategories();
+  const posts: { post: Post; category: string }[] = [];
+
+  for (const category of categories) {
+    const catPosts = await getPosts(category.id);
+    posts.push(
+      ...catPosts.map((post) => {
+        return { post, category: sanitizeSlug(category.slug) };
+      })
+    );
+  }
+
+  const params = posts.map((post) => {
+    return {
+      params: {
+        category: post.category,
+        post: sanitizeSlug(post.post.slug),
+        lang: "en",
+      },
+    };
+  });
+
+  return params;
+}
+
+const { post: postSlug, category: categorySlug } = Astro.params;
+
+const category = docsOf(
+  await firestore
+    .collection("categories")
+    .where("slug", "==", categorySlug)
+    .get()
+)[0];
+const post = docsOf<Post>(
+  await firestore
+    .collection("posts")
+    .where("slug", "==", postSlug)
+    .where("category", "==", category.id)
+    .get()
+)[0];
+---
+
+<Layout title={post?.title || "Blog post"}>
+  <Markdown.Inline of={post?.content || '# Error generating page'} />
+</Layout>

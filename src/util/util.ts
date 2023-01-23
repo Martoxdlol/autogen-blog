@@ -14,3 +14,7 @@ export function defaultLangSingleRoutePaths() {
 export function supportAllLanguagesRoutePaths() {
     return languages.list.map(lang => { params: { lang: lang.code } })
 }
+
+export function sanitizeSlug(slug: string) {
+    return slug.trim().replace(/[\/\\\#"']/gi, '_')
+}

@@ -12,6 +12,7 @@ export interface Category extends DocData {
     name: string
     description: string
     picture: string
+    slug: string
 }
 
 export interface Author extends DocData {
@@ -45,12 +46,12 @@ if(DISABLE_GENERATION) {
     console.log('\x1b[36m******************************************************************************\x1b[0m')
 }
 
-function docsOf<T extends DocData>(queryResult: FirebaseFirestore.QuerySnapshot<FirebaseFirestore.DocumentData>) {
+export function docsOf<T extends DocData>(queryResult: FirebaseFirestore.QuerySnapshot<FirebaseFirestore.DocumentData>) {
     return queryResult.docs.map(doc => docOf<T>(doc)!)
 }
 
 
-function docOf<T extends DocData>(docResult: FirebaseFirestore.DocumentSnapshot<FirebaseFirestore.DocumentData>) {
+export function docOf<T extends DocData>(docResult: FirebaseFirestore.DocumentSnapshot<FirebaseFirestore.DocumentData>) {
     if (!docResult.exists) return null
     const doc: any = docResult.data()
     doc._created = docResult.createTime
