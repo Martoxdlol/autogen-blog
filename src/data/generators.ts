@@ -69,10 +69,12 @@ export function generateCategoryDescription(title: string) {
 }
 
 export function generateSlugFromTitle(title: string) {
-    const prompt = "Task: create slug for this title: \n" + title
-        + '\n---\n'
-        + "slug:"
-    return autocomplete(prompt, 100)
+    return generateSlug(title)
+    /// FUCK AI
+    // const prompt = "Task: create slug for this title: \n" + title
+    //     + '\n---\n'
+    //     + "slug:"
+    // return autocomplete(prompt, 100)
 }
 
 export async function generateAuthorsNamesAndLangs(initialAuthors: Author[], maxAmount: number) {

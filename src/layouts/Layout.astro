@@ -6,13 +6,12 @@ interface Props {
     description?: string
 }
 
-const lang = getCurrentLang(Astro);
-const { title, description } = Astro.props;
+const { title, description, lang } = Astro.props;
 
 ---
 
 <!DOCTYPE html>
-<html lang={lang.code}>
+<html lang={lang}>
     <head>
         <meta charset="UTF-8" />
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />

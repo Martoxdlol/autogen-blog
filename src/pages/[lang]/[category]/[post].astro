@@ -2,8 +2,7 @@
 import { firestore } from "../../../data/config";
 import {
   Category,
-  docOf,
-  docsOf,
+  getAuthor,
   getCategories,
   getCategory,
   getPosts,
@@ -11,8 +10,7 @@ import {
 } from "../../../data/data";
 import Layout from "../../../layouts/Layout.astro";
 import { Markdown } from "@astropub/md";
-import { sanitizeSlug } from "../../../util/util";
-
+import { docsOf } from "../../../util/util";
 export async function getStaticPaths() {
   const categories = await getCategories();
   const posts: { post: Post; category: string }[] = [];
@@ -21,7 +19,7 @@ export async function getStaticPaths() {
     const catPosts = await getPosts(category.id);
     posts.push(
       ...catPosts.map((post) => {
-        return { post, category: sanitizeSlug(category.slug) };
+        return { post, category: category.slug };
       })
     );
   }
@@ -30,8 +28,8 @@ export async function getStaticPaths() {
     return {
       params: {
         category: post.category,
-        post: sanitizeSlug(post.post.slug),
-        lang: "en",
+        post: post.post.slug,
+        lang: post.post.lang,
       },
     };
   });
@@ -39,9 +37,9 @@ export async function getStaticPaths() {
   return params;
 }
 
-const { post: postSlug, category: categorySlug } = Astro.params;
+const { post: postSlug, category: categorySlug, lang } = Astro.params;
 
-const category = docsOf(
+const category = docsOf<Category>(
   await firestore
     .collection("categories")
     .where("slug", "==", categorySlug)
@@ -54,8 +52,25 @@ const post = docsOf<Post>(
     .where("category", "==", category.id)
     .get()
 )[0];
+
+const author = (await getAuthor(post.author))!;
 ---
 
 <Layout title={post?.title || "Blog post"}>
-  <Markdown.Inline of={post?.content || '# Error generating page'} />
+  <header>
+    <a href={`/en`}>Home</a>
+    <p>Title: <b>{post.title}</b></p>
+    <p>Author: <b>{author.name}</b></p>
+    <p>Language: <b>{post.lang}</b></p>
+    <p>Category: <b>{category.name}</b></p>
+  </header>
+  <hr />
+  <article>
+    <Markdown.Inline of={post?.content || "# Error generating page"} />
+  </article>
+  <hr />
+  <p>
+    Created with AI
+  </p>
+  <p>Made by <b>Tomás Cichero</b> - See <a href="https://github.com/Martoxdlol/autogen-blog">Github repo</a></p>
 </Layout>

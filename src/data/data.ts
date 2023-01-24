@@ -1,12 +1,7 @@
 import { openai } from "../aitools/openai"
+import { DocData, docOf, docsOf } from "../util/util"
 import { firestore } from "./config"
 import { generateAuthorSelfDescription, generateAuthorsNamesAndLangs, generateCategoriesTitles, generateCategoryDescription, generatePostContent, generatePostsTitlesFromCategory, generateSlug, generateSlugFromTitle, generateSummary, generateTopics, matchTitleToAuthor } from "./generators"
-
-interface DocData {
-    id: string // Firebae generated id
-    _created: number // Internal use
-    _updated?: number // Internal use
-}
 
 export interface Category extends DocData {
     name: string
@@ -31,6 +26,7 @@ export interface Post extends DocData {
     content: string
     author: string // Ficitcious author
     date: number // Date of the event/new/post
+    category: string
 }
 
 const MAX_CATEGORIES = parseInt(import.meta.env.MAX_CATEGORIES || 20)
@@ -44,20 +40,6 @@ if(DISABLE_GENERATION) {
     console.log('\x1b[36m******************************************************************************\x1b[0m')
     console.log("GENERATION DISABLED")
     console.log('\x1b[36m******************************************************************************\x1b[0m')
-}
-
-export function docsOf<T extends DocData>(queryResult: FirebaseFirestore.QuerySnapshot<FirebaseFirestore.DocumentData>) {
-    return queryResult.docs.map(doc => docOf<T>(doc)!)
-}
-
-
-export function docOf<T extends DocData>(docResult: FirebaseFirestore.DocumentSnapshot<FirebaseFirestore.DocumentData>) {
-    if (!docResult.exists) return null
-    const doc: any = docResult.data()
-    doc._created = docResult.createTime
-    doc._updated = docResult.updateTime
-    doc.id = docResult.id
-    return doc as T
 }
 
 // Authors
