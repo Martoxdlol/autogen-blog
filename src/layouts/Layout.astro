@@ -10,7 +10,7 @@ const { title, description, lang } = Astro.props;
 
 ---
 
-<style>
+<style is:global>
     * {
         box-sizing: border-box;
     }
@@ -21,8 +21,16 @@ const { title, description, lang } = Astro.props;
     }
 
     body {
-        max-width: 100%;
+        width: 100vw;
         overflow-x: hidden;
+        margin: 0;
+        padding: 10px;
+    }
+    
+    p {
+        widows: 100%;
+        text-align: justify;
+        text-justify: distribute;
     }
 </style>
 
