@@ -56,21 +56,32 @@ const post = docsOf<Post>(
 const author = (await getAuthor(post.author))!;
 ---
 
+<style>
+  .home {
+    color: rgb(1, 128, 187)!important;
+    font-weight: 600;
+  }
+</style>
+
 <Layout title={post?.title || "Blog post"}>
-  <header>
-    <a href={`/en`}>Home</a>
-    <p>Title: <b>{post.title}</b></p>
-    <p>Author: <b>{author.name}</b></p>
-    <p>Language: <b>{post.lang}</b></p>
-    <p>Category: <b>{category.name}</b></p>
-  </header>
-  <hr />
-  <article>
-    <Markdown.Inline of={post?.content || "# Error generating page"} />
-  </article>
-  <hr />
-  <p>
-    Created with AI
-  </p>
-  <p>Made by <b>Tomás Cichero</b> - See <a href="https://github.com/Martoxdlol/autogen-blog">Github repo</a></p>
+  <div class="content">
+    <header>
+      <a href={`/en`} class="home">Home</a>
+      <p>Title: <b>{post.title}</b></p>
+      <p>Author: <b>{author.name}</b></p>
+      <p>Language: <b>{post.lang}</b></p>
+      <p>Category: <b>{category.name}</b></p>
+    </header>
+    <hr />
+    <article>
+      <Markdown.Inline of={post?.content || "# Error generating page"} />
+    </article>
+    <hr />
+    <p>Created with AI</p>
+    <p>
+      Made by <b>Tomás Cichero</b> - See <a
+        href="https://github.com/Martoxdlol/autogen-blog">Github repo</a
+      >
+    </p>
+  </div>
 </Layout>
