@@ -22,4 +22,38 @@ I will add multilanguage support with AI translation in the future.
 
 Using variables **MAX_CATEGORIES**, **MAX_POST_PER_CATEGORY** and **MAX_AUTHORS**, it will generate the content starting with authors, categories and then posts, to fill the max amount. If some document is deleter or a vraiable is agumented it will only generate the remaining quantity. Also, generation is disabled on github actions by default. Feel free to change that.
 
-Check **/src/data/generatos.ts** and **/src/data/data.ts** to understand content generation
+## How is the complete process of content generation
+
+1. It generates a list of topics (ex: "Money & Finance", "Education", "Gardening", etc.) using this prompt to GPT3 api: "List 30 general topics of blogs and news:"
+
+2. It generates a list of auhtors names and languages example: 
+ - en:John Smith
+ - es:Juan Perez
+ - fr:Jean Dubois
+ 
+3. Then it associates random topics (two or three) to every author.
+   Each author will write things related to their topics.
+
+4. It generates a list of categories made with multiple topics. Example: "Generate 10 blog categories based on the topics: 
+ - Money & Finance
+ - Education
+ - Gardening"
+ - ...
+ - **Result:**
+ - Business Strategies
+ - Home & Garden & Automotive
+ - ...
+ 
+5. It generates a list of posts titles for each category.
+   
+   For each title and category it matches the title to a author considerint their topics.
+   It doesn't work perfectly yet.
+
+6. Having already post title, category, author and language (from the author)
+   it can now generate post the content.
+   Using all this information it generates the post main content in markdown and generates a summary (not used yet)
+   
+GPT3 gives a lot of possibilities. The behavior could be different but this is one way to do it.
+   
+
+Check **/src/data/generatos.ts** and **/src/data/data.ts** for more details on the functions and the prompts to the api
